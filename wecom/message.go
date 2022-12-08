@@ -1,10 +1,7 @@
 package wecom
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -22,8 +19,10 @@ type WeComMessage struct {
 // SendMessage
 // https://developer.work.weixin.qq.com/document/path/90236
 func (wecom *WeCom) SendMessage(meta *WeComMessage, message map[string]any) (*WeComMessageResponse, error) {
-	token, _ := wecom.GetToken()
-	url := API + fmt.Sprintf("/message/send?access_token=%s", token.AccessToken)
+	token, err := wecom.GetToken()
+	if err != nil {
+		return nil, err
+	}
 
 	var payload map[string]any
 	ja, _ := json.Marshal(meta)
@@ -32,23 +31,58 @@ func (wecom *WeCom) SendMessage(meta *WeComMessage, message map[string]any) (*We
 	json.Unmarshal(ja, &payload)
 	json.Unmarshal(jb, &payload)
 
-	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
-	res, err := wecom.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	data, err := io.ReadAll(res.Body)
+	api := "/message/send?access_token=" + token.AccessToken
+	data, err := wecom.SendRequest(http.MethodPost, api, payload)
 	var resp *WeComMessageResponse
 	json.Unmarshal(data, &resp)
 	return resp, err
 }
 
-func (wecom *WeCom) SendTextMessage(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
+func (wecom *WeCom) RecallMessage(msgId string) (*WeComErrorResponse, error) {
+	token, _ := wecom.GetToken()
+	payload := map[string]string{
+		"msgid": msgId,
+	}
+	api := "/message/recall?access_token=" + token.AccessToken
+	data, err := wecom.SendRequest(http.MethodPost, api, payload)
+	if err != nil {
+		return nil, err
+	}
+	var resp *WeComErrorResponse
+	json.Unmarshal(data, &resp)
+	return resp, err
+}
+
+func (wecom *WeCom) SendText(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
+	meta.MsgType = "text"
 	message := map[string]any{
 		"text": map[string]any{
 			"content": content,
 		},
 	}
 	return wecom.SendMessage(meta, message)
+}
+
+func (wecom *WeCom) SendImage(meta *WeComMessage) {
+
+}
+
+func (wecom *WeCom) SendVideo(meta *WeComMessage) {
+
+}
+
+func (wecom *WeCom) SendFile(meta *WeComMessage) {
+
+}
+
+func (wecom *WeCom) SendTextCard(meta *WeComMessage) {
+
+}
+
+func (wecom *WeCom) SendNews(meta *WeComMessage) {
+
+}
+
+func (wecom *WeCom) SendMarkdown(meta *WeComMessage) {
+
 }
