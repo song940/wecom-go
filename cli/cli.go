@@ -2,15 +2,18 @@ package cli
 
 import (
 	"log"
+	"os"
 
 	"github.com/song940/wecom/wecom"
 )
 
 func Run() {
+	WECOM_CORP_ID := os.Getenv("WECOM_CORP_ID")
+	WECOM_CORP_SECRET := os.Getenv("WECOM_CORP_ID")
 
 	client := wecom.NewClient(
-		"wx154021007ed664e5",
-		"z-W9O0wpdoUlhyneavoCa210xKQRj7qNceDeR6eGk9o",
+		WECOM_CORP_ID,
+		WECOM_CORP_SECRET,
 	)
 
 	// token, _ := client.GetToken()
