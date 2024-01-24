@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -21,34 +20,28 @@ type WeComMediaResponse struct {
 
 // Upload file
 // https://developer.work.weixin.qq.com/document/path/90253
-func (wecom *WeCom) Upload(filename string) (*WeComMediaResponse, error) {
-
+func (wecom *WeComClient) Upload(filename string) (resp *WeComMediaResponse, err error) {
 	var (
 		buf = new(bytes.Buffer)
 		w   = multipart.NewWriter(buf)
 	)
-
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	data, _ := io.ReadAll(f)
-	part, _ := w.CreateFormFile("media", filepath.Base(f.Name()))
+	data, _ := os.ReadFile(filename)
+	part, _ := w.CreateFormFile("media", filepath.Base(filename))
 	part.Write(data)
-
 	token, _ := wecom.GetToken()
 	url := API + fmt.Sprintf("/media/upload?access_token=%s&type=%s", token.AccessToken, "image")
 	req, _ := http.NewRequest(http.MethodPost, url, buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	res, err := wecom.Client.Do(req)
+	res, err := wecom.client.Do(req)
 	if err != nil {
-		return nil, err
+		return
 	}
-	body, _ := io.ReadAll(res.Body)
-
-	log.Println(string(body))
-
-	var resp *WeComMediaResponse
-	json.Unmarshal(body, &resp)
-	return resp, err
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
+	// log.Println(string(body))
+	resp = &WeComMediaResponse{}
+	err = json.Unmarshal(body, &resp)
+	return
 }

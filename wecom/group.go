@@ -14,7 +14,7 @@ type WeComGroupResponse struct {
 }
 
 // https://developer.work.weixin.qq.com/document/path/90245
-func (wecom *WeCom) CreateGroup(group *WeComGroup) (*WeComGroupResponse, error) {
+func (wecom *WeComClient) CreateGroup(group *WeComGroup) (*WeComGroupResponse, error) {
 	token, _ := wecom.GetToken()
 	api := "/appchat/create?access_token=" + token.AccessToken
 	data, err := wecom.SendRequest(http.MethodPost, api, group)
@@ -24,16 +24,16 @@ func (wecom *WeCom) CreateGroup(group *WeComGroup) (*WeComGroupResponse, error) 
 }
 
 // https://developer.work.weixin.qq.com/document/path/90246
-func (wecom *WeCom) UpdateGroupInfo() {
+func (wecom *WeComClient) UpdateGroupInfo() {
 	// https://qyapi.weixin.qq.com/cgi-bin/appchat/update?access_token=ACCESS_TOKEN
 }
 
 // https://developer.work.weixin.qq.com/document/path/90247
-func (wecom *WeCom) GetGroupInfo() {
+func (wecom *WeComClient) GetGroupInfo() {
 	// https://qyapi.weixin.qq.com/cgi-bin/appchat/get?access_token=ACCESS_TOKEN&chatid=CHATID
 }
 
 // https://developer.work.weixin.qq.com/document/path/90248
-func (wecom *WeCom) GroupSend() {
+func (wecom *WeComClient) GroupSend() {
 	// https://qyapi.weixin.qq.com/cgi-bin/appchat/send?access_token=ACCESS_TOKEN
 }

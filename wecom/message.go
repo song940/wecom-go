@@ -11,14 +11,18 @@ type WeComMessageResponse struct {
 }
 
 type WeComMessage struct {
-	To      string `json:"touser"`
-	MsgType string `json:"msgtype"`
-	AgentId uint32 `json:"agentid"`
+	ToUser                 string `json:"touser,omitempty"`
+	ToParty                string `json:"toparty,omitempty"`
+	ToTag                  string `json:"totag,omitempty"`
+	MsgType                string `json:"msgtype"`
+	AgentId                uint32 `json:"agentid"`
+	EnableDuplicateCheck   uint32 `json:"enable_duplicate_check,omitempty"`
+	DuplicateCheckInterval uint32 `json:"duplicate_check_interval,omitempty"`
 }
 
 // SendMessage
 // https://developer.work.weixin.qq.com/document/path/90236
-func (wecom *WeCom) SendMessage(meta *WeComMessage, message map[string]any) (*WeComMessageResponse, error) {
+func (wecom *WeComClient) SendMessage(meta *WeComMessage, message map[string]any) (resp *WeComMessageResponse, err error) {
 	token, err := wecom.GetToken()
 	if err != nil {
 		return nil, err
@@ -33,12 +37,15 @@ func (wecom *WeCom) SendMessage(meta *WeComMessage, message map[string]any) (*We
 
 	api := "/message/send?access_token=" + token.AccessToken
 	data, err := wecom.SendRequest(http.MethodPost, api, payload)
-	var resp *WeComMessageResponse
-	json.Unmarshal(data, &resp)
-	return resp, err
+	if err != nil {
+		return
+	}
+	resp = &WeComMessageResponse{}
+	err = json.Unmarshal(data, &resp)
+	return
 }
 
-func (wecom *WeCom) RecallMessage(msgId string) (*WeComErrorResponse, error) {
+func (wecom *WeComClient) RecallMessage(msgId string) (*WeComErrorResponse, error) {
 	token, _ := wecom.GetToken()
 	payload := map[string]string{
 		"msgid": msgId,
@@ -53,7 +60,7 @@ func (wecom *WeCom) RecallMessage(msgId string) (*WeComErrorResponse, error) {
 	return resp, err
 }
 
-func (wecom *WeCom) SendText(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
+func (wecom *WeComClient) SendText(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
 	meta.MsgType = "text"
 	message := map[string]any{
 		"text": map[string]any{
@@ -63,26 +70,78 @@ func (wecom *WeCom) SendText(meta *WeComMessage, content string) (*WeComMessageR
 	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeCom) SendImage(meta *WeComMessage) {
-
+func (wecom *WeComClient) SendImage(meta *WeComMessage) (*WeComMessageResponse, error) {
+	meta.MsgType = "image"
+	message := map[string]any{
+		"image": map[string]any{
+			"media_id": "",
+		},
+	}
+	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeCom) SendVideo(meta *WeComMessage) {
-
+func (wecom *WeComClient) SendVideo(meta *WeComMessage) (*WeComMessageResponse, error) {
+	meta.MsgType = "video"
+	message := map[string]any{
+		"video": map[string]any{
+			"media_id":    "",
+			"title":       "",
+			"description": "",
+		},
+	}
+	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeCom) SendFile(meta *WeComMessage) {
-
+func (wecom *WeComClient) SendFile(meta *WeComMessage) (*WeComMessageResponse, error) {
+	meta.MsgType = "file"
+	message := map[string]any{
+		"file": map[string]any{
+			"media_id": "",
+		},
+	}
+	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeCom) SendTextCard(meta *WeComMessage) {
-
+type TextCard struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	ButtonText  string `json:"btntxt"`
 }
 
-func (wecom *WeCom) SendNews(meta *WeComMessage) {
-
+func (wecom *WeComClient) SendTextCard(meta *WeComMessage, textcard *TextCard) (*WeComMessageResponse, error) {
+	meta.MsgType = "textcard"
+	message := map[string]any{
+		"textcard": textcard,
+	}
+	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeCom) SendMarkdown(meta *WeComMessage) {
+type Article struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	PicURL      string `json:"picurl"`
+	AppID       string `json:"appid,omitempty"`
+	PagePath    string `json:"pagepath,omitempty"`
+}
 
+func (wecom *WeComClient) SendNews(meta *WeComMessage, articles []Article) (*WeComMessageResponse, error) {
+	meta.MsgType = "news"
+	message := map[string]any{
+		"news": map[string]any{
+			"articles": articles,
+		},
+	}
+	return wecom.SendMessage(meta, message)
+}
+
+func (wecom *WeComClient) SendMarkdown(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
+	meta.MsgType = "markdown"
+	message := map[string]any{
+		"markdown": map[string]any{
+			"content": content,
+		},
+	}
+	return wecom.SendMessage(meta, message)
 }
