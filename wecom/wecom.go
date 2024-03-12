@@ -13,14 +13,14 @@ const (
 	API = "https://qyapi.weixin.qq.com/cgi-bin"
 )
 
-type WeComClientConfig struct {
+type Config struct {
 	CorpId     string
 	CorpSecret string
 }
 
-type WeComClient struct {
+type Client struct {
 	client *http.Client
-	config *WeComClientConfig
+	config *Config
 }
 
 type WeComErrorResponse struct {
@@ -34,9 +34,9 @@ type WeComTokenResponse struct {
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-func NewClient(config *WeComClientConfig) (wecom *WeComClient) {
+func NewClient(config *Config) (wecom *Client) {
 	client := &http.Client{}
-	wecom = &WeComClient{
+	wecom = &Client{
 		client: client,
 		config: config,
 	}
@@ -45,7 +45,7 @@ func NewClient(config *WeComClientConfig) (wecom *WeComClient) {
 
 // GetToken
 // docs: https://developer.work.weixin.qq.com/document/path/90664
-func (wecom *WeComClient) GetToken() (resp *WeComTokenResponse, err error) {
+func (wecom *Client) GetToken() (resp *WeComTokenResponse, err error) {
 	api := fmt.Sprintf("/gettoken?corpid=%s&corpsecret=%s", wecom.config.CorpId, wecom.config.CorpSecret)
 	data, err := wecom.SendRequest(http.MethodGet, api, nil)
 	if err != nil {
@@ -61,7 +61,7 @@ func (wecom *WeComClient) GetToken() (resp *WeComTokenResponse, err error) {
 	return
 }
 
-func (wecom *WeComClient) SendRequest(method string, path string, body any) (data []byte, err error) {
+func (wecom *Client) SendRequest(method string, path string, body any) (data []byte, err error) {
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return

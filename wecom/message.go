@@ -22,7 +22,7 @@ type WeComMessage struct {
 
 // SendMessage
 // https://developer.work.weixin.qq.com/document/path/90236
-func (wecom *WeComClient) SendMessage(meta *WeComMessage, message map[string]any) (resp *WeComMessageResponse, err error) {
+func (wecom *Client) SendMessage(meta *WeComMessage, message map[string]any) (resp *WeComMessageResponse, err error) {
 	token, err := wecom.GetToken()
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (wecom *WeComClient) SendMessage(meta *WeComMessage, message map[string]any
 	return
 }
 
-func (wecom *WeComClient) RecallMessage(msgId string) (*WeComErrorResponse, error) {
+func (wecom *Client) RecallMessage(msgId string) (*WeComErrorResponse, error) {
 	token, _ := wecom.GetToken()
 	payload := map[string]string{
 		"msgid": msgId,
@@ -60,7 +60,7 @@ func (wecom *WeComClient) RecallMessage(msgId string) (*WeComErrorResponse, erro
 	return resp, err
 }
 
-func (wecom *WeComClient) SendText(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
+func (wecom *Client) SendText(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
 	meta.MsgType = "text"
 	message := map[string]any{
 		"text": map[string]any{
@@ -70,7 +70,7 @@ func (wecom *WeComClient) SendText(meta *WeComMessage, content string) (*WeComMe
 	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeComClient) SendImage(meta *WeComMessage) (*WeComMessageResponse, error) {
+func (wecom *Client) SendImage(meta *WeComMessage) (*WeComMessageResponse, error) {
 	meta.MsgType = "image"
 	message := map[string]any{
 		"image": map[string]any{
@@ -80,7 +80,7 @@ func (wecom *WeComClient) SendImage(meta *WeComMessage) (*WeComMessageResponse, 
 	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeComClient) SendVideo(meta *WeComMessage) (*WeComMessageResponse, error) {
+func (wecom *Client) SendVideo(meta *WeComMessage) (*WeComMessageResponse, error) {
 	meta.MsgType = "video"
 	message := map[string]any{
 		"video": map[string]any{
@@ -92,7 +92,7 @@ func (wecom *WeComClient) SendVideo(meta *WeComMessage) (*WeComMessageResponse, 
 	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeComClient) SendFile(meta *WeComMessage) (*WeComMessageResponse, error) {
+func (wecom *Client) SendFile(meta *WeComMessage) (*WeComMessageResponse, error) {
 	meta.MsgType = "file"
 	message := map[string]any{
 		"file": map[string]any{
@@ -109,7 +109,7 @@ type TextCard struct {
 	ButtonText  string `json:"btntxt"`
 }
 
-func (wecom *WeComClient) SendTextCard(meta *WeComMessage, textcard *TextCard) (*WeComMessageResponse, error) {
+func (wecom *Client) SendTextCard(meta *WeComMessage, textcard *TextCard) (*WeComMessageResponse, error) {
 	meta.MsgType = "textcard"
 	message := map[string]any{
 		"textcard": textcard,
@@ -126,7 +126,7 @@ type Article struct {
 	PagePath    string `json:"pagepath,omitempty"`
 }
 
-func (wecom *WeComClient) SendNews(meta *WeComMessage, articles []Article) (*WeComMessageResponse, error) {
+func (wecom *Client) SendNews(meta *WeComMessage, articles []Article) (*WeComMessageResponse, error) {
 	meta.MsgType = "news"
 	message := map[string]any{
 		"news": map[string]any{
@@ -136,7 +136,7 @@ func (wecom *WeComClient) SendNews(meta *WeComMessage, articles []Article) (*WeC
 	return wecom.SendMessage(meta, message)
 }
 
-func (wecom *WeComClient) SendMarkdown(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
+func (wecom *Client) SendMarkdown(meta *WeComMessage, content string) (*WeComMessageResponse, error) {
 	meta.MsgType = "markdown"
 	message := map[string]any{
 		"markdown": map[string]any{

@@ -20,7 +20,7 @@ type WeComMediaResponse struct {
 
 // Upload file
 // https://developer.work.weixin.qq.com/document/path/90253
-func (wecom *WeComClient) Upload(filename string) (resp *WeComMediaResponse, err error) {
+func (wecom *Client) Upload(filename string) (resp *WeComMediaResponse, err error) {
 	var (
 		buf = new(bytes.Buffer)
 		w   = multipart.NewWriter(buf)
